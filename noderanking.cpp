@@ -3,65 +3,66 @@
 #include <queue>
 #include <climits>
 
-class Graph {
+class MyGraph {
 public:
-    int vertices;
-    std::vector<std::vector<int>> adjacencyList;
+    int totalVertices;
+    std::vector<std::vector<int> > connections;
 
-    Graph(int v) : vertices(v), adjacencyList(v) {}
+    MyGraph(int totalV) : totalVertices(totalV), connections(totalV) {}
 
-    void addEdge(int u, int v) {
-        adjacencyList[u].push_back(v);
-        adjacencyList[v].push_back(u);
+    void createConnection(int a, int b) {
+        connections[a].push_back(b);
+        connections[b].push_back(a);
     }
 
-    std::vector<int> calculateNodeRanks(int startNode) {
-        std::vector<int> nodeRanks(vertices, INT_MAX);
+    std::vector<int> getNodeLevels(int start) {
+        std::vector<int> levels(totalVertices, INT_MAX);
         std::queue<int> q;
-        q.push(startNode);
-        nodeRanks[startNode] = 0;
+        q.push(start);
+        levels[start] = 0;
 
         while (!q.empty()) {
             int current = q.front();
             q.pop();
 
-            for (int neighbor : adjacencyList[current]) {
-                if (nodeRanks[neighbor] == INT_MAX) {
-                    nodeRanks[neighbor] = nodeRanks[current] + 1;
+            for (std::vector<int>::iterator it = connections[current].begin(); it != connections[current].end(); ++it) {
+                int neighbor = *it;
+                if (levels[neighbor] == INT_MAX) {
+                    levels[neighbor] = levels[current] + 1;
                     q.push(neighbor);
                 }
             }
         }
 
-        return nodeRanks;
+        return levels;
     }
 };
 
 int main() {
-    const int numVertices = 10;
-    Graph graph(numVertices);
+    const int totalNodes = 10;
+    MyGraph myGraph(totalNodes);
 
-    graph.addEdge(4, 1);
-    graph.addEdge(4, 7);
-    graph.addEdge(2, 4);
-    graph.addEdge(4, 6);
-    graph.addEdge(1, 5);
-    graph.addEdge(1, 2);
-    graph.addEdge(1, 3);
-    graph.addEdge(2, 3);
-    graph.addEdge(2, 5);
-    graph.addEdge(7, 8);
-    graph.addEdge(7, 6);
-    graph.addEdge(8, 9);
-    graph.addEdge(9, 6);
-    graph.addEdge(8, 6);
+    myGraph.createConnection(4, 1);
+    myGraph.createConnection(4, 7);
+    myGraph.createConnection(2, 4);
+    myGraph.createConnection(4, 6);
+    myGraph.createConnection(1, 5);
+    myGraph.createConnection(1, 2);
+    myGraph.createConnection(1, 3);
+    myGraph.createConnection(2, 3);
+    myGraph.createConnection(2, 5);
+    myGraph.createConnection(7, 8);
+    myGraph.createConnection(7, 6);
+    myGraph.createConnection(8, 9);
+    myGraph.createConnection(9, 6);
+    myGraph.createConnection(8, 6);
 
     const int startNode = 1;
-    std::vector<int> nodeRanks = graph.calculateNodeRanks(startNode);
+    std::vector<int> nodeLevels = myGraph.getNodeLevels(startNode);
 
-    std::cout << "Node Ranks:\n";
-    for (int i = 0; i < numVertices; ++i) {
-        std::cout << "Node " << i << ": " << nodeRanks[i] << "\n";
+    std::cout << "Node Levels:\n";
+    for (int i = 0; i < totalNodes; ++i) {
+        std::cout << "Node " << i << ": " << nodeLevels[i] << "\n";
     }
 
     return 0;
