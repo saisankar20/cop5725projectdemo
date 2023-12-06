@@ -3,14 +3,13 @@
 #include <set>
 #include <queue>
 
-typedef std::vector<std::vector<int> > Graph;
+typedef std::vector<std::vector<int>> Graph;
 
 struct MotifInstance {
     int node1, node2, node3;
 };
 
-void SMP(const Graph& graph, int tau, int seed, int& discoveredCount, std::set<int>& discoveredNodes, std::vector<MotifInstance>& motifInstances) {
-
+void findMotifs(const Graph &graph, int seed, std::vector<MotifInstance> &motifInstances) {
     for (size_t i = 0; i < graph[seed].size(); ++i) {
         int neighbor1 = graph[seed][i];
         for (size_t j = 0; j < graph[neighbor1].size(); ++j) {
@@ -24,28 +23,40 @@ void SMP(const Graph& graph, int tau, int seed, int& discoveredCount, std::set<i
             }
         }
     }
+}
 
-    std::vector<int> distance(graph.size(), -1);
-    std::queue<int> q;
-    q.push(seed);
-    distance[seed] = 0;
+void performTraversal(const Graph &graph, int start, std::vector<int> &distances) {
+    std::queue<int> traversalQueue;
+    std::set<int> visitedNodes;
 
-    while (!q.empty()) {
-        int current = q.front();
-        q.pop();
+    traversalQueue.push(start);
+    visitedNodes.insert(start);
+    distances[start] = 0;
 
-        for (size_t i = 0; i < graph[current].size(); ++i) {
-            int neighbor = graph[current][i];
-            if (distance[neighbor] == -1) {
-                distance[neighbor] = distance[current] + 1;
-                q.push(neighbor);
+    while (!traversalQueue.empty()) {
+        int currentVertex = traversalQueue.front();
+        traversalQueue.pop();
+
+        for (size_t idx = 0; idx < graph[currentVertex].size(); ++idx) {
+            int nextNeighbor = graph[currentVertex][idx];
+            if (visitedNodes.find(nextNeighbor) == visitedNodes.end()) {
+                distances[nextNeighbor] = distances[currentVertex] + 1;
+                traversalQueue.push(nextNeighbor);
+                visitedNodes.insert(nextNeighbor);
             }
         }
     }
+}
+
+void SMP(const Graph &graph, int tau, int seed, int &discoveredCount, std::set<int> &discoveredNodes, std::vector<MotifInstance> &motifInstances) {
+    std::vector<int> distances(graph.size(), -1);
+    performTraversal(graph, seed, distances);
+
+    findMotifs(graph, seed, motifInstances);
 
     discoveredCount += motifInstances.size();
     for (size_t i = 0; i < motifInstances.size(); ++i) {
-        const MotifInstance& motif = motifInstances[i];
+        const MotifInstance &motif = motifInstances[i];
         discoveredNodes.insert(motif.node1);
         discoveredNodes.insert(motif.node2);
         discoveredNodes.insert(motif.node3);
@@ -54,7 +65,7 @@ void SMP(const Graph& graph, int tau, int seed, int& discoveredCount, std::set<i
 
 int main() {
     Graph graph;
-    
+
     graph.push_back(std::vector<int>());
     graph[0].push_back(1);
     graph[0].push_back(2);
