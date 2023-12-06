@@ -20,13 +20,13 @@ struct MotifInstance {
 };
 
 bool isMotif(const std::vector<int>& nodes, const Graph& baseGraph) {
-    
+ 
     if (nodes.size() == 3) {
         int u = nodes[0];
         int v = nodes[1];
         int w = nodes[2];
 
-
+       
         return std::find(baseGraph.adjList[u].begin(), baseGraph.adjList[u].end(), v) != baseGraph.adjList[u].end() &&
                std::find(baseGraph.adjList[v].begin(), baseGraph.adjList[v].end(), w) != baseGraph.adjList[v].end() &&
                std::find(baseGraph.adjList[w].begin(), baseGraph.adjList[w].end(), u) != baseGraph.adjList[w].end();
@@ -36,7 +36,8 @@ bool isMotif(const std::vector<int>& nodes, const Graph& baseGraph) {
 }
 
 bool checkIfMotifInstancesShouldConnect(const MotifInstance& instance1, const MotifInstance& instance2) {
-        for (std::vector<int>::const_iterator it1 = instance1.nodes.begin(); it1 != instance1.nodes.end(); ++it1) {
+    
+    for (std::vector<int>::const_iterator it1 = instance1.nodes.begin(); it1 != instance1.nodes.end(); ++it1) {
         for (std::vector<int>::const_iterator it2 = instance2.nodes.begin(); it2 != instance2.nodes.end(); ++it2) {
             if (*it1 == *it2) {
                 return true;
@@ -63,28 +64,28 @@ Graph constructHigherOrderGraph(const Graph& baseGraph, const std::vector<MotifI
 }
 
 std::vector<MotifInstance> findShortestMotifPath(const Graph& baseGraph, int s, int t, const std::vector<MotifInstance>& motifInstances) {
-    std::queue<int> bfsQueue;
-    std::vector<int> distance(baseGraph.V, -1);
-    std::vector<int> parent(baseGraph.V, -1);
+    std::queue<int> traversalQueue;
+    std::vector<int> distances(baseGraph.V, -1);
+    std::vector<int> parents(baseGraph.V, -1);
 
-    bfsQueue.push(s);
-    distance[s] = 0;
+    traversalQueue.push(s);
+    distances[s] = 0;
 
-    while (!bfsQueue.empty()) {
-        int u = bfsQueue.front();
-        bfsQueue.pop();
+    while (!traversalQueue.empty()) {
+        int currentVertex = traversalQueue.front();
+        traversalQueue.pop();
 
-        for (std::vector<int>::const_iterator it = baseGraph.adjList[u].begin(); it != baseGraph.adjList[u].end(); ++it) {
-            int v = *it;
-            if (distance[v] == -1) {
-                distance[v] = distance[u] + 1;
-                parent[v] = u;
-                bfsQueue.push(v);
+        for (std::vector<int>::const_iterator neighborIt = baseGraph.adjList[currentVertex].begin(); neighborIt != baseGraph.adjList[currentVertex].end(); ++neighborIt) {
+            int nextVertex = *neighborIt;
+            if (distances[nextVertex] == -1) {
+                distances[nextVertex] = distances[currentVertex] + 1;
+                parents[nextVertex] = currentVertex;
+                traversalQueue.push(nextVertex);
             }
         }
     }
 
-
+    
     std::vector<MotifInstance> motifPath;
     int currentNode = t;
 
@@ -92,18 +93,18 @@ std::vector<MotifInstance> findShortestMotifPath(const Graph& baseGraph, int s, 
         MotifInstance instance;
         instance.nodes.push_back(currentNode);
         motifPath.insert(motifPath.begin(), instance);  // Insert at the beginning to reverse the order
-        currentNode = parent[currentNode];
+        currentNode = parents[currentNode];
     }
 
     return motifPath;
 }
 
 int main() {
-   
+    
     int numNodes = 10;
     Graph baseGraph(numNodes);
 
-
+   
     baseGraph.addEdge(4, 1);
     baseGraph.addEdge(4, 7);
     baseGraph.addEdge(2, 4);
@@ -120,7 +121,7 @@ int main() {
     baseGraph.addEdge(9, 6);
     baseGraph.addEdge(8, 6);
 
-   
+    
     std::vector<MotifInstance> motifInstances;
     for (int i = 0; i < numNodes - 2; ++i) {
         for (int j = i + 1; j < numNodes - 1; ++j) {
@@ -138,38 +139,38 @@ int main() {
         }
     }
 
- 
-    int startNode = 1;  // Adjust based on your random values
-    int endNode = 7;    // Adjust based on your random values
+    
+    int startNode = 1;  
+    int endNode = 7;    
 
     Graph higherOrderGraph = constructHigherOrderGraph(baseGraph, motifInstances);
 
     std::vector<MotifInstance> shortestMotifPath = findShortestMotifPath(baseGraph, startNode, endNode, motifInstances);
 
-   
-    std::cout << "Base Graph:\n";
-    for (int i = 0; i < numNodes; ++i) {
-        std::cout << "Node " << i << ": ";
-        for (std::vector<int>::const_iterator it = baseGraph.adjList[i].begin(); it != baseGraph.adjList[i].end(); ++it) {
-            std::cout << *it << " ";
+
+    std::cout << "Graph Information:\n";
+    for (int vertex = 0; vertex < numNodes; ++vertex) {
+        std::cout << "Vertex " << vertex << ": Connected to ";
+        for (std::vector<int>::const_iterator neighborIt = baseGraph.adjList[vertex].begin(); neighborIt != baseGraph.adjList[vertex].end(); ++neighborIt) {
+            std::cout << *neighborIt << " ";
         }
         std::cout << "\n";
     }
 
-   
+    
     std::cout << "\nMotif Instances:\n";
-    for (std::vector<MotifInstance>::const_iterator it = motifInstances.begin(); it != motifInstances.end(); ++it) {
-        std::cout << "Motif Instance: ";
-        for (std::vector<int>::const_iterator nodeIt = it->nodes.begin(); nodeIt != it->nodes.end(); ++nodeIt) {
+    for (std::vector<MotifInstance>::const_iterator instanceIt = motifInstances.begin(); instanceIt != motifInstances.end(); ++instanceIt) {
+        std::cout << "Instance: ";
+        for (std::vector<int>::const_iterator nodeIt = instanceIt->nodes.begin(); nodeIt != instanceIt->nodes.end(); ++nodeIt) {
             std::cout << *nodeIt << " ";
         }
         std::cout << "\n";
     }
 
-
-    std::cout << "\nShortest Motif-Path: ";
-    for (std::vector<MotifInstance>::const_iterator it = shortestMotifPath.begin(); it != shortestMotifPath.end(); ++it) {
-        for (std::vector<int>::const_iterator nodeIt = it->nodes.begin(); nodeIt != it->nodes.end(); ++nodeIt) {
+   
+    std::cout << "\nShortest Path: ";
+    for (std::vector<MotifInstance>::const_iterator pathIt = shortestMotifPath.begin(); pathIt != shortestMotifPath.end(); ++pathIt) {
+        for (std::vector<int>::const_iterator nodeIt = pathIt->nodes.begin(); nodeIt != pathIt->nodes.end(); ++nodeIt) {
             std::cout << *nodeIt << " ";
         }
         std::cout << "-> ";
