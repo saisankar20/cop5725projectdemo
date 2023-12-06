@@ -3,7 +3,7 @@
 #include <set>
 #include <queue>
 
-typedef std::vector<std::vector<int>> Graph;
+typedef std::vector<std::vector<int> > Graph;
 
 struct MotifInstance {
     int node1, node2, node3;
