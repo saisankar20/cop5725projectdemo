@@ -19,7 +19,7 @@ public:
         adjList[v].insert(u);
     }
 
-
+    
     double MKI(int x, int y, int L, double epsilon) {
         double score = 0.0;
 
@@ -78,13 +78,13 @@ int main() {
     int nodeX = 3;
     int nodeY = 9;
     int L = 3; 
-    double epsilon = 1.0; // Set your desired value for epsilon
+    double epsilon = 0.8; 
 
     double MKIScore = graph.MKI(nodeX, nodeY, L, epsilon);
     double MGDScore = graph.MGD(nodeX, nodeY);
 
-    cout << "Motif-path based Katz Index (MKI) score: " << MKIScore << endl;
-    cout << "Motif-path based Graph Distance (MGD) score: " << MGDScore << endl;
+    cout << "Motif-path Katz Index score: " << MKIScore << endl;
+    cout << "Motif-path Graph Distance score: " << MGDScore << endl;
 
     return 0;
 }
